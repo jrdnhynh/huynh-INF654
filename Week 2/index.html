@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <!-- extra styles -->
+    <style>
+        .row>div {
+            padding: 10px;
+            background: white;
+            border: 1px solid;
+            line-height: 60px;
+        }
+        .row {
+            margin: 40px auto;
+        }
+    </style>
+
+    <title>Materialize CSS</title>
+</head>
+<body>
+    <div class="container">
+        <!-- hide -->
+        <h1>Hide</h1>
+        <h4 class="hide">Hide me on all screens.</h4>
+        <h4 class="hide-on-small-only">Hide me on small screens.</h4>
+        <h4 class="hide-on-med-only">Hide me on medium screens.</h4>
+        <h4 class="hide-on-large-only">Hide me on large screens.</h4>
+        <h4 class="hide-on-med-and-down">Hide me on medium and down screens.</h4>
+
+        <!-- colors -->
+        <h1>Colors</h1>
+        <h5 class="light-blue">The background should be blue.</h5>
+        <h5 class="light-blue lighten-4">The background should be lightened blue.</h5>
+        <h5 class="light-blue darken-4">The background should be darkened blue.</h5>
+
+        <!-- alignment -->
+        <h1>Alignment</h1>
+        <h5 class="center-align">Center Aligned</h5>
+        <h5 class="left-align">Left Aligned</h5>
+        <h5 class="right-align">Right Aligned</h5>
+        <h5 class="grey valign-wrapper" style="height: 200px">
+            Vertical Aligned
+        </h5>
+
+        <!-- truncate -->
+        <h1>Truncate</h1>
+        <p class="truncate">Lorem ipsum dolor sit amet consectetur adipisicing elit. Sequi quisquam ab odit eveniet molestias? Corrupti natus veniam quia aliquid eum error repellat dolor nulla quas consequuntur, inventore officiis quam reprehenderit?</p>
+
+        <!-- buttons -->
+        <h1>Buttons</h1>
+        <a href="" class="btn">Button</a>
+        <a href="" class="btn-small">Small Button</a>
+        <a href="" class="btn-large">Large Button</a>
+        <a href="" class="btn-flat">Flat Button</a>
+        <a href="" class="btn light-blue">Blue Button</a>
+        <a href="" class="btn light-blue waves-effect black-text">Blue Button with Wave Effect</a>
+        <a href="" class="btn light-blue waves-effect waves-purple black-text">Blue Button with Purple Wave Effect</a>
+
+        <!-- icons -->
+        <h1>Icons</h1>
+        <i class="material-icons red-text">error</i>
+        <i class="material-icons yellow-text text-darken-2">warning</i>
+        <i class="material-icons blue-text text-lighten-2">cloud</i>
+        <i class="material-icons light-blue-text text-lighten-4">folder</i>
+        <a href="" class="btn">
+            <span>Send</span>
+            <i class="material-icons right">send</i>
+        </a>
+        
+        <!-- grid -->
+        <h1>Grids</h1>
+        <div class="row">
+            <div class="col s12">Sample content</div>
+            <div class="col s3 m9">Sample content</div>
+            <div class="col s3">Sample content</div>
+            <div class="col s3">Sample content</div>
+            <div class="col s3 m9">Sample content</div>
+        </div>
+
+        <!-- z-depth -->
+        <h1>Z-Depth</h1>
+        <div class="col s12 m2">
+            <p class="z-depth-1">z-depth-1</p>
+        </div>
+        <div class="col s12 m2">
+            <p class="z-depth-2">z-depth-2</p>
+        </div>
+        <div class="col s12 m2">
+            <p class="z-depth-3">z-depth-3</p>
+        </div>
+        <div class="col s12 m2">
+            <p class="z-depth-4">z-depth-4</p>
+        </div>
+        <div class="col s12 m2">
+            <p class="z-depth-5">z-depth-5</p>
+        </div>
+
+        <!-- nav bar -->
+        <h1>Nav Bar</h1>
+        <div class="container">
+            <nav class="light-blue">
+                <div class="nav-wrapper">
+                    <div class="container">
+                        <a href="#" class="brand-logo">Logo</a>
+                        <a href="#" class="sidenav-trigger" data-target="mobile-menu"><i class="material-icons">menu</i></a>
+                        <ul class="hide-on-med-and-down right">
+                            <li><a href="#">Home</a></li>
+                            <li><a href="#">About</a></li>
+                            <li><a href="#">Contact</a></li>
+                            <li><a href="#">Login</a></li>
+                            <li><a href="#" class="btn-floating blue darken-2 z-depth-0">
+                    <i class="material-icons">notifications</i>
+                </a></li>
+                <li><span class="badge white-text black new">5</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <ul class="sidenav">
+                <li><a href="#">Home</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Contact</a></li>
+                <li><a href="#">Login</a></li>
+                
+            </ul>
+        </div>
+
+        <h1>Cards</h1>
+        <div class="row">
+            <div class="col s12 l6">
+                <div class="card">
+                    <div class="card-image">
+                        <img src="images/js.png" alt="">
+                        <a href="" class="halfway-fab btn-floating red pulse center">
+                            <i class="material-icons">favorite</i>
+                        </a>
+                    </div>
+                    
+                    <div class="card-content">
+                        <span class="card-title">JS</span>
+                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Itaque, necessitatibus quibusdam delectus accusamus iusto, saepe quas accusantium quisquam nisi ab, sunt tempore magni magnam sit odit cumque asperiores quae ipsam!</p>
+                    </div>
+                    <div class="card-action">
+                        <a href="">More Details</a>
+                        <a href="">Learn More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <!-- jquery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</body>
+</html>
