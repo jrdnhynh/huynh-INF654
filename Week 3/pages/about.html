@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <title>Task Manager</title>
+</head>
+<body class="grey lighten-4">
+    <header>
+        <!-- nav bar for large screens -->
+        <nav class="z-depth-0 blue lighten-3">
+            <div class="nav-wrapper container">
+                <a href="../index.html" data-target="mobile-menu" class="brand-logo blue-text text-darken-2" aria-label="Task Manager">Task Manager</a>
+
+                <!-- nav bar hamburger menu for medium/small screens -->
+                <a href="#" class="sidenav-trigger right hide-on-med-and-up blue-text text-darken-2" data-target="mobile-menu">
+                    <i class="material-icons">menu</i>
+                </a>
+
+                <!-- nav bar links for large screens -->
+                <ul class="right hide-on-small-and-down">
+                    <li>
+                        <a href="../index.html" class="waves-effect grey-text text-darken-4">Home</a>
+                        <a href="about.html" class="waves-effect grey-text text-darken-4">About</a>
+                        <a href="contact.html" class="waves-effect grey-text text-darken-4">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <aside>
+        <ul class="sidenav" id="mobile-menu">
+            <li><a href="../index.html" class="subheader">Task Manager</a></li>
+            <li>
+                <a href="../index.html" class="waves-effect grey-text text-darken-4">Home</a>
+                <a href="about.html" class="waves-effect grey-text text-darken-4">About</a>
+                <a href="contact.html" class="waves-effect grey-text text-darken-4"><i class="material-icons">mail_outline</i>Contact</a>
+            </li>
+        </ul>
+    </aside>
+
+    <div class="container grey-text">
+        <h5 class="center">About Task Manager</h5>
+        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptate debitis error sequi, nisi eum ipsa numquam accusantium, consectetur repellendus esse doloribus minima delectus? Odit voluptatem eius laudantium dicta aliquid officia?</p>
+    </div>
+
+    <script src="../js/materialize.min.js"></script>
+    <script src="../js/ui.js"></script>
+</body>
+</html>
