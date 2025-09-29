@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact | Task Manager</title>
+
+    <!-- Google Icon Font -->
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+
+    <!-- Materialize CSS -->
+    <link
+      rel="stylesheet"
+      href="../css/materialize.min.css"
+      media="screen,projection"
+    />
+  </head>
+  <body>
+    <header>
+      <!-- Navbar -->
+      <nav class="z-depth-0 orange lighten-4">
+        <div class="nav-wrapper container">
+          <a href="../index.html" class="brand-logo orange-text text-darken-2"
+            >Task Manager</a
+          >
+          <a
+            href="#"
+            class="sidenav-trigger right hide-on-med-and-up black-text"
+            data-target="mobile-menu"
+          >
+            <i class="material-icons">menu</i>
+          </a>
+          <ul class="right hide-on-small-and-down">
+            <li><a href="../index.html" class="grey-text text-darken-4">Home</a></li>
+            <li>
+              <a href="about.html" class="grey-text text-darken-4">About</a>
+            </li>
+            <li class="active">
+              <a href="contact.html" class="orange-text text-darken-2"
+                >Contact</a
+              >
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Mobile sidenav -->
+    <ul class="sidenav" id="mobile-menu">
+      <li class="subheader">Task Manager</li>
+      <li><a href="/" class="grey-text text-darken-4">Home</a></li>
+      <li><a href="about.html" class="grey-text text-darken-4">About</a></li>
+      <li>
+        <a href="contact.html" class="grey-text text-darken-4">
+          <i class="material-icons left">mail_outline</i>Contact
+        </a>
+      </li>
+    </ul>
+
+    <main class="container section">
+      <h4 class="orange-text text-darken-2">Get in touch</h4>
+      <p class="flow-text grey-text text-darken-3">
+        Questions, feedback, or ideas for the Task Manager demo? Send a message
+        below.
+      </p>
+
+      <div class="row">
+        <!-- Contact form -->
+        <div class="col s12 m7">
+          <div class="card">
+            <div class="card-content">
+              <span class="card-title">Contact form</span>
+              <form id="contact-form" novalidate>
+                <div class="input-field">
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    class="validate"
+                    required
+                  />
+                  <label for="name" class="black-text">Your Name</label>
+                  <span
+                    class="helper-text"
+                    data-error="Name is required"
+                  ></span>
+                </div>
+
+                <div class="input-field">
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    class="validate"
+                    required
+                  />
+                  <label for="email" class="black-text">Email</label>
+                  <span
+                    class="helper-text"
+                    data-error="Enter a valid email"
+                  ></span>
+                </div>
+
+                <div class="input-field">
+                  <input
+                    id="subject"
+                    name="subject"
+                    type="text"
+                    class="validate"
+                    required
+                  />
+                  <label for="subject" class="black-text">Subject</label>
+                  <span
+                    class="helper-text"
+                    data-error="Subject is required"
+                  ></span>
+                </div>
+
+                <div class="input-field">
+                  <textarea
+                    id="message"
+                    name="message"
+                    class="materialize-textarea"
+                    required
+                  ></textarea>
+                  <label for="message" class="black-text">Message</label>
+                  <span
+                    class="helper-text"
+                    data-error="Message is required"
+                  ></span>
+                </div>
+
+                <div class="input-field">
+                  <button
+                    type="submit"
+                    class="btn orange darken-2 waves-effect"
+                  >
+                    <i class="material-icons left">send</i>Send
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact info / map -->
+        <div class="col s12 m5">
+          <ul class="collection with-header z-depth-1">
+            <li class="collection-header"><h6>Contact details</h6></li>
+            <li class="collection-item">
+              <i class="material-icons left">email</i> info@taskmanager.demo
+            </li>
+            <li class="collection-item">
+              <i class="material-icons left">call</i> (555) 123-4567
+            </li>
+            <li class="collection-item">
+              <i class="material-icons left">location_on</i> Hays, KS
+            </li>
+          </ul>
+
+          <div class="card">
+            <div class="card-image">
+              <!-- Placeholder map (replace src with your own if needed) -->
+              <iframe
+                title="Map"
+                src="https://maps.google.com/maps?q=Hays%2C%20KS&t=&z=12&ie=UTF8&iwloc=&output=embed"
+                width="100%"
+                height="220"
+                frameborder="0"
+                style="border: 0"
+                allowfullscreen
+              >
+              </iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="page-footer orange lighten-4">
+      <div class="container grey-text text-darken-4">
+        © 2025 Task Manager | Built with Materialize CSS
+      </div>
+    </footer>
+
+    <!-- Materialize JS -->
+    <script src="../js/materialize.min.js"></script>
+    <script src="../js/ui.js"></script>
+  </body>
+</html>
