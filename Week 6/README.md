@@ -2,11 +2,11 @@
 
 ## Project Overview
 
-This project is a **Progressive Web App (PWA) design prototype** for a simple, client-side JPEG/PNG image compressor named **Pixel Squeeze**.
+This project is a **Progressive Web App design prototype** for a simple JPEG/PNG image compressor named **Pixel Squeeze**.
 
-The primary objective is to demonstrate the core PWA capabilities required for this assignment, including **installability** (adding to the home screen) and **offline functionality**, using the **Materialize CSS framework** for a clean, responsive, and app-like user interface.
+The primary objective is to demonstrate the core PWA capabilities, including **installability** (adding to the home screen) and **offline functionality**, using the **Materialize CSS framework** for a clean, responsive, and app-like user interface.
 
-***Note:** This is purely a design and simulation prototype. The compression results are calculated using mock data and JavaScript timing, not actual low-level image processing.*
+***Note:** This is just a design and simulation prototype. The compression results are calculated using mock data and JavaScript timing, not actual low-level image processing.*
 
 ## Key PWA Features Demonstrated
 
@@ -16,7 +16,7 @@ The primary objective is to demonstrate the core PWA capabilities required for t
 
 * **Responsive Design:** The layout adapts smoothly to both mobile and desktop screen sizes, utilizing the Materialize framework.
 
-* **Simulated Functionality:** The UI captures user input (file selection and quality), simulates processing time, and displays mock size and reduction statistics, focusing on the user experience flow.
+* **Simulated Functionality:** The user interface allows for user input (file selection and quality), simulates processing time, and displays mock size and reduction statistics.
 
 ## How to View the Prototype
 
