@@ -4,7 +4,7 @@
 
 This project is a **Progressive Web App design prototype** for a simple JPEG/PNG image compressor named **Pixel Squeeze**.
 
-The primary objective is to demonstrate the core PWA capabilities, including **installability** (adding to the home screen) and **offline functionality**, using the **Materialize CSS framework** for a clean, responsive, and app-like user interface.
+The goal of this assignment is to show the core PWA capabilities. This includes **installability** (adding to the home screen) and **offline functionality**, using the **Materialize CSS framework** for a clean, responsive, and app-like user interface.
 
 ***Note:** This is just a design and simulation prototype. The compression results are calculated using mock data and JavaScript timing, not actual low-level image processing.*
 
@@ -14,7 +14,7 @@ The primary objective is to demonstrate the core PWA capabilities, including **i
 
 * **Offline Access:** **Service Worker** registration is included, indicating that the core UI and compression simulation logic would function even without an internet connection.
 
-* **Responsive Design:** The layout adapts smoothly to both mobile and desktop screen sizes, utilizing the Materialize framework.
+* **Responsive Design:** The layout is responsive to both mobile and desktop screen sizes using the Materialize framework.
 
 * **Simulated Functionality:** The user interface allows for user input (file selection and quality), simulates processing time, and displays mock size and reduction statistics.
 
@@ -24,9 +24,9 @@ To test the prototype's design and PWA features, follow these steps:
 
 1. **Open the File:** Open the `pixel_squeeze_pwa_prototype.html` file in a modern web browser (Local Web Server/HTTPS Required for PWA installation prompt to appear).
 
-2. **Select a File (Simulated):** Click the **"Select Picture"** button and choose any image file from your computer.
+2. **Select a File (Simulated):** Click the **"Select Picture"** button and choose any JPEG or PNG file from your computer.
 
-3. **Simulate Compression:** Adjust the quality slider (optional) and click the **"Simulate Squeeze & Download"** button.
+3. **Simulate Compression:** Adjust the quality slider and click the **"Simulate Squeeze & Download"** button.
 
 4. **Observe Results:** A brief loading indicator will display, followed by the simulated results showing the file type, original size, and mock compressed size.
 
