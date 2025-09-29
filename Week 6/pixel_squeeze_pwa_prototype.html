@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Image Squeeze PWA Prototype</title>
+
+    <link rel="stylesheet" href="styles.css">
+    <!-- materialize css link and icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+
+    <!-- PWA Manifest Link (CRITICAL PWA REQUIREMENT) -->
+    <link rel="manifest" href="manifest.json">
+    <script id="pwa-manifest-placeholder" type="application/json">
+        {
+          "name": "Pixel Squeeze Simple",
+          "short_name": "SqueezeIt",
+          "description": "Image compressor prototype showing offline capabilities.",
+          "start_url": "./pixel_squeeze_pwa_prototype.html",
+          "display": "standalone",
+          "background_color": "#f0f4c3",
+          "theme_color": "#c0ca33",
+          "icons": [
+            {
+              "src": "https://placehold.co/192x192/c0ca33/ffffff?text=PS",
+              "sizes": "192x192",
+              "type": "image/png"
+            }
+          ]
+        }
+    </script>
+</head>
+<body>
+
+    <!-- simple nav bar -->
+    <header>
+        <nav class="lime darken-1">
+            <div class="nav-wrapper container">
+                <a href="pixel_squeeze_pwa_prototype.html" class="brand-logo">Simple Image Squeeze</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- main content -->
+    <main class="container">
+        <div class="row">
+            <div class="col s12">
+                <div class="card-panel white z-depth-3 center-align">
+                    <i class="material-icons large lime-text text-darken-3">photo_camera</i>
+                    <h5>Get Your Images Small!</h5>
+                    <p class="grey-text">Compresses images right here. **Prototype Mode: Results are simulated.**</p>
+
+                    <!-- file input -->
+                    <div class="file-field input-field" style="margin-top: 30px;">
+                        <div class="btn lime darken-1 waves-effect waves-light">
+                            <span>Select Picture</span>
+                            <input type="file" id="fileInput" accept="image/jpeg, image/png">
+                        </div>
+                        <div class="file-path-wrapper">
+                            <input class="file-path validate" type="text" placeholder="No file selected yet">
+                        </div>
+                    </div>
+
+                    <!-- settings (hidden until file selected) -->
+                    <div id="settings-area" style="display: none; margin-top: 25px; text-align: left;">
+                        <p>Selected File: <strong id="fileNameDisplay"></strong></p>
+                        
+                        <!-- quality slider (basic HTML range input) -->
+                        <label for="qualitySlider">Compression Quality:</label>
+                        <p class="range-field">
+                            <span id="qualityValue" class="right lime-text text-darken-3">80%</span>
+                            <input type="range" id="qualitySlider" min="10" max="100" value="80" />
+                        </p>
+                        
+                        <!-- action button -->
+                        <a id="compressButton" class="waves-effect waves-light btn-large lime darken-1 full-width" style="width: 100%; margin-top: 20px;" onclick="startCompression()">
+                            <i class="material-icons left">download</i>Simulate Squeeze & Download
+                        </a>
+                        
+                        <!-- simple loading bar -->
+                        <div class="progress" id="loadingIndicator" style="display: none;">
+                            <div class="indeterminate lime darken-2"></div>
+                        </div>
+                        
+                        <!-- output info (result display) -->
+                        <div id="sizeInfo" style="margin-top: 15px; font-weight: bold;"></div>
+                    </div>
+
+                    <!-- output preview (simulated result) -->
+                    <img id="output-image" style="max-width: 100%; border-radius: 4px; margin-top: 20px; display: none;" alt="Compressed Preview" />
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- PWA install prompt banner -->
+    <div id="install-prompt">
+        Install the app for offline squeezing!
+        <a href="#" class="btn-small white green-text text-darken-4 right" id="install-button" onclick="promptInstall()">Install</a>
+    </div>
+
+    <!-- materialize JS and custom script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        // --- global Variables ---
+        const fileInput = document.getElementById('fileInput');
+        const settingsArea = document.getElementById('settings-area');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const qualitySlider = document.getElementById('qualitySlider');
+        const qualityValueSpan = document.getElementById('qualityValue');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const sizeInfo = document.getElementById('sizeInfo');
+        const outputImage = document.getElementById('output-image');
+        
+        let originalFile = null;
+
+        // --- UI updates ---
+        qualitySlider.addEventListener('input', () => {
+            qualityValueSpan.textContent = `${qualitySlider.value}%`;
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            originalFile = e.target.files[0];
+            if (originalFile) {
+                fileNameDisplay.textContent = originalFile.name;
+                settingsArea.style.display = 'block';
+                outputImage.style.display = 'none';
+                sizeInfo.textContent = '';
+                
+                // assign mock type based on filename for simulation logic
+                originalFile.type = originalFile.name.endsWith('.png') ? 'image/png' : 'image/jpeg';
+                
+                M.toast({html: 'Image loaded! Set your quality and compress.', classes: 'green darken-1'});
+            }
+        });
+
+        // --- core SIMULATION function ---
+        function startCompression() {
+            if (!originalFile) {
+                return M.toast({html: 'Please pick an image first!', classes: 'red darken-2'});
+            }
+
+            loadingIndicator.style.display = 'block';
+            sizeInfo.innerHTML = '';
+            outputImage.style.display = 'none';
+
+            M.toast({html: 'Simulating client-side compression...', classes: 'blue'});
+
+            // --- SIMULATION LOGIC: use mock data based on file type ---
+            setTimeout(() => {
+                loadingIndicator.style.display = 'none';
+
+                let mockOriginalSizeKB = 3500; // default Mock for JPEG
+                let mockCompressedSizeKB = 650; 
+                let reduction = 81.4;
+
+                if (originalFile.type.includes('png')) {
+                    // mock data for PNG
+                    mockOriginalSizeKB = 1800; 
+                    mockCompressedSizeKB = 850; 
+                    reduction = 52.7;
+                }
+
+                const quality = qualitySlider.value;
+                
+                // display simulated results
+                sizeInfo.innerHTML = `
+                    Original File Type: <strong>${originalFile.type.toUpperCase().replace('IMAGE/', '')}</strong><br>
+                    Original Size: ${(mockOriginalSizeKB / 1024).toFixed(2)} MB<br>
+                    Quality Set: ${quality}%<br>
+                    Compressed Size: <span class="green-text text-darken-3">${(mockCompressedSizeKB / 1024).toFixed(2)} MB</span><br>
+                    Size Reduction: <span class="green-text text-darken-3">${reduction.toFixed(1)}%</span>
+                `;
+                
+                // show a placeholder image to simulate the result
+                outputImage.src = `https://placehold.co/600x300/c0ca33/ffffff?text=Compressed+Image+Result+@+${quality}%`;
+                outputImage.style.display = 'block';
+                
+                M.toast({html: 'Prototype Complete! (Simulated download successful)', classes: 'green darken-2'});
+            }, 1500); // simulate 1.5 second processing time
+            // --- END SIMULATION LOGIC ---
+        }
+
+        // --- PWA Setup (for installability/offline requirement) ---
+        let deferredPrompt;
+        const installPromptDiv = document.getElementById('install-prompt');
+
+        // service worker: required for PWA status (offline capability)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(reg => console.log('Service Worker Registered (Prototype).'))
+                    .catch(err => console.error('Service Worker Failed:', err));
+            });
+        }
+        
+        // before install prompt: required for home screen install
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installPromptDiv.style.display = 'block';
+        });
+
+        // function to trigger the actual browser install dialog
+        function promptInstall() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        M.toast({html: 'App installed! It lives on your home screen now.', classes: 'blue'});
+                    } else {
+                        M.toast({html: 'Installation cancelled.', classes: 'orange'});
+                    }
+                    deferredPrompt = null;
+                    installPromptDiv.style.display = 'none';
+                });
+            }
+        }
+    </script>
+</body>
+</html>

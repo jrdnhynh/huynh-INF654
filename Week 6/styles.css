@@ -1,0 +1,31 @@
+body {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    background-color: #f0f4c3;
+    font-family: 'Inter', sans-serif;
+}
+main {
+    flex: 1 0 auto;
+    padding: 20px;
+}
+.container {
+    max-width: 600px;
+}
+.card-panel {
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+/* PWA install banner */
+#install-prompt {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px;
+    background-color: #558b2f;
+    color: white;
+    text-align: center;
+    z-index: 1000;
+    display: none;
+}
