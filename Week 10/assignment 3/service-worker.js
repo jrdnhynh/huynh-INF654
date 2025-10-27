@@ -13,7 +13,7 @@ const urlsToCache = [
   // Note: External placeholder images will generally not be cached unless explicitly listed.
 ];
 
-// --- 1. iNSTALL EVENT ---
+// --- 1. INSTALL EVENT ---
 // inits when the service worker is first installed. caches all essential assets.
 self.addEventListener('install', event => {
   console.log('[Service Worker] Install Event: Starting caching...');
