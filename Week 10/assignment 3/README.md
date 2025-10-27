@@ -14,7 +14,7 @@ The goal of this assignment is to show the core PWA capabilities. This includes 
 
 * **Responsive Design:** The layout is responsive to both mobile and desktop screen sizes using the Materialize framework.
 
-* **Simulated Functionality:** The user interface allows for user input (file selection and quality), simulates processing time, and displays mock size and reduction statistics.
+* **Compression Functionality:** The user interface allows for user input (file selection and quality), simulates processing time, and displays mock size and reduction statistics.
 
 ## How to View the PWA
 
