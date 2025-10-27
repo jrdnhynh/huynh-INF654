@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- ... existing head content ... -->
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Task Manager</title>
+    <link rel="stylesheet" href="css/materialize.min.css" />
+    <!-- Import Google Icon Font -->
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <!-- Add viewport meta tag -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+
+  <body class="grey lighten-4">
+    <header>
+      <!-- ... existing header content ... -->
+    </header>
+
+    <aside>
+      <!-- ... existing sidenav content ... -->
+    </aside>
+
+    <main>
+      <!-- Storage Information Messages -->
+      <div class="container">
+        <div id="persistent-storage-message" class="card-panel">
+          <h6
+            id="persistent-storage-info"
+            class="green-text text-darken-2"
+          ></h6>
+        </div>
+        <div id="storage-info-message" class="card-panel">
+          <h6 id="storage-info" class="orange-text text-darken-2"></h6>
+        </div>
+        <div
+          id="storage-warning"
+          class="card-panel red lighten-4"
+          style="display: none"
+        >
+          <h6 class="red-text text-darken-2"></h6>
+        </div>
+      </div>
+
+      <!-- Tasks -->
+      <div class="tasks container grey-text text-darken-1">
+        <!-- Task Template -->
+      </div>
+
+      <!-- Add Task Button -->
+      <div class="center">
+        <button
+          class="btn-floating btn-large orange darken-2 sidenav-trigger"
+          data-target="side-form"
+          aria-label="Add new task"
+        >
+          <i class="material-icons">add</i>
+        </button>
+      </div>
+
+      <!-- Side Form for Adding Tasks -->
+      <div id="side-form" class="sidenav side-form">
+        <form class="add-task container section">
+          <h6>Add New Task</h6>
+          <div class="divider"></div>
+          <div class="input-field">
+            <label for="title" class="black-text">Task Title</label>
+            <input
+              placeholder="Enter Task title"
+              id="title"
+              class="validate"
+              type="text"
+            />
+          </div>
+          <div class="input-field">
+            <label for="description" class="black-text">Task Description</label>
+            <input
+              placeholder="Enter Task description"
+              id="description"
+              class="validate"
+              type="text"
+            />
+          </div>
+          <div class="input-field center">
+            <button type="button" class="btn-small orange darken-2">Add</button>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="js/materialize.min.js"></script>
+    <script type="module" src="js/ui.js"></script>
+  </body>
+</html>
