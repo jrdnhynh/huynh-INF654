@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Squeeze: Image Compressor</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+    
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+    <header>
+        <nav class="lime darken-1">
+            <div class="nav-wrapper container">
+                <a href="#!" class="brand-logo">Pixel Squeeze: Image Compressor</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="row">
+            <div class="col s12">
+                <div class="card-panel white z-depth-3 center-align" style="border-radius: 8px;">
+                    <i class="material-icons large lime-text text-darken-3">photo_camera</i>
+                    <h5>Get Your Images Small!</h5>
+                    <p class="grey-text">Real client-side image compression for JPEG and PNG (converted to JPEG).</p>
+
+                    <div id="firebaseStatus" class="chip right" style="margin-top: 5px;">
+                        <i class="material-icons left red-text">cloud_off</i> Offline
+                    </div>
+
+                    <div class="file-field input-field" style="margin-top: 30px;">
+                        <div class="btn lime darken-1 waves-effect waves-light" style="border-radius: 4px;">
+                            <span>Select Picture</span>
+                            <input type="file" id="fileInput" accept="image/jpeg, image/png">
+                        </div>
+                        <div class="file-path-wrapper">
+                            <input class="file-path validate" type="text" placeholder="No file selected yet">
+                        </div>
+                    </div>
+
+                    <div id="settings-area" style="display: none; margin-top: 25px; text-align: left;">
+                        <p>Selected File: <strong id="fileNameDisplay"></strong></p>
+                        
+                        <label for="qualitySlider">JPEG Compression Quality (10 - 100):</label>
+                        <p class="range-field">
+                            <span id="qualityValue" class="right lime-text text-darken-3">80%</span>
+                            <input type="range" id="qualitySlider" min="10" max="100" value="80" />
+                        </p>
+                        
+                        <a id="compressButton" class="waves-effect waves-light btn-large lime darken-1 full-width" style="width: 100%; margin-top: 20px; border-radius: 4px;" onclick="startCompression()">
+                            <i class="material-icons left">compress</i>Squeeze & Download
+                        </a>
+                        
+                        <div class="progress" id="loadingIndicator" style="display: none;">
+                            <div class="indeterminate lime darken-2"></div>
+                        </div>
+                        
+                        <div id="sizeInfo" class="flow-text" style="margin-top: 15px; font-weight: bold;"></div>
+                    </div>
+
+                    <canvas id="imageCanvas" style="display: none;"></canvas>
+                    <img id="output-image" style="max-width: 100%; height: auto; border-radius: 4px; margin-top: 20px; display: none; border: 1px solid #c0ca33;" alt="Compressed Preview" />
+                    
+                    <h5 style="margin-top: 30px; text-align: left;"><i class="material-icons left">history</i> Compression History</h5>
+                    <ul class="collection" id="historyList" style="text-align: left;">
+                        <li class="collection-item grey-text">No records yet. Compress an image!</li>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="install-prompt">
+        Install the app for instant access and offline compression!
+        <a href="#" class="btn-small white lime-text text-darken-4 right" id="install-button" onclick="promptInstall()" style="border-radius: 4px; font-weight: bold;">Install</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    
+    <script src="https://unpkg.com/dexie@3.2.1/dist/dexie.js"></script>
+    
+    <script type="module" src="firebaseConfig.js"></script>
+    <script type="module" src="firebaseDB.js"></script>
+
+    <script type="module">
+        // import modules
+        import { initializeAuth, isAuthReady } from "./firebaseConfig.js";
+        import { saveRecord, getLocalRecords, subscribeToFirebaseRecords, syncOfflineToFirebase, deleteRecord } from "./firebaseDB.js";
+        
+        // --- global variables (now includes new elements and utility) ---
+        const fileInput = document.getElementById('fileInput');
+        const settingsArea = document.getElementById('settings-area');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const qualitySlider = document.getElementById('qualitySlider');
+        const qualityValueSpan = document.getElementById('qualityValue');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const sizeInfo = document.getElementById('sizeInfo');
+        const outputImage = document.getElementById('output-image');
+        const imageCanvas = document.getElementById('imageCanvas');
+        const ctx = imageCanvas.getContext('2d');
+        const firebaseStatus = document.getElementById('firebaseStatus');
+        const historyList = document.getElementById('historyList');
+
+        let originalFile = null;
+        let originalFileSize = 0; // In bytes
+        let isOnline = navigator.onLine; // Initial network status
+
+        // --- PWA: Network Status Manager ---
+        function updateNetworkStatus(online) {
+            isOnline = online;
+            if (isOnline) {
+                firebaseStatus.innerHTML = `<i class="material-icons left green-text">cloud_done</i> Synced`;
+                firebaseStatus.classList.remove('red-text', 'orange-text');
+                firebaseStatus.classList.add('green-text');
+                
+                // Attempt to sync offline records when back online
+                syncOfflineToFirebase().then(result => {
+                    if (result.count > 0) {
+                        M.toast({html: result.message, classes: 'green darken-2'});
+                    }
+                });
+            } else {
+                firebaseStatus.innerHTML = `<i class="material-icons left red-text">cloud_off</i> Offline`;
+                firebaseStatus.classList.remove('green-text', 'orange-text');
+                firebaseStatus.classList.add('red-text');
+            }
+        }
+
+        window.addEventListener('online', () => updateNetworkStatus(true));
+        window.addEventListener('offline', () => updateNetworkStatus(false));
+
+        // --- PWA: record history UI ---
+        window.humanFileSize = (bytes) => {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        };
+
+        window.renderHistory = async () => {
+            const records = await getLocalRecords();
+            historyList.innerHTML = ''; // clear current list
+
+            if (records.length === 0) {
+                historyList.innerHTML = '<li class="collection-item grey-text">No records yet. Compress an image!</li>';
+                return;
+            }
+
+            records.forEach(record => {
+                const isSynced = record.synced;
+                const syncIcon = isSynced 
+                    ? `<i class="material-icons green-text tooltipped" data-tooltip="Synced to Firebase" data-position="left">cloud_done</i>`
+                    : `<i class="material-icons orange-text tooltipped" data-tooltip="Local Only - Sync Pending" data-position="left">cloud_upload</i>`;
+                
+                const deleteIcon = `<i class="material-icons secondary-content red-text delete-record" data-id="${record.firebaseId || record.id}" data-synced="${isSynced}">delete_forever</i>`;
+                
+                const recordElement = `
+                    <li class="collection-item">
+                        <div>
+                            ${record.name}
+                            ${deleteIcon}
+                            <span class="secondary-content" style="margin-right: 15px;">
+                                ${syncIcon}
+                            </span>
+                            <p class="grey-text text-darken-1" style="margin-top: 5px;">
+                                Quality: ${record.quality}% | 
+                                **${humanFileSize(record.compressedSize)}** (${record.reduction.toFixed(1)}% reduction)
+                            </p>
+                        </div>
+                    </li>
+                `;
+                historyList.innerHTML += recordElement;
+            });
+            
+            // re-initialize tooltips for the new elements
+            M.Tooltip.init(document.querySelectorAll('.tooltipped'));
+
+            // attach delete listeners
+            document.querySelectorAll('.delete-record').forEach(icon => {
+                icon.addEventListener('click', async (e) => {
+                    const id = e.target.getAttribute('data-id');
+                    const isFirebaseRecord = e.target.getAttribute('data-synced') === 'true';
+                    
+                    try {
+                        const message = await deleteRecord(id, isFirebaseRecord, isOnline);
+                        M.toast({html: message, classes: 'light-blue darken-1'});
+                        renderHistory(); // refresh the list
+                    } catch (error) {
+                        M.toast({html: error.message, classes: 'red darken-2'});
+                    }
+                });
+            });
+        };
+        
+        // --- compression function ---
+        window.startCompression = async () => {
+            if (!originalFile) {
+                return M.toast({html: 'Please pick an image first!', classes: 'red darken-2'});
+            }
+
+            loadingIndicator.style.display = 'block';
+            sizeInfo.innerHTML = `Original Size: ${humanFileSize(originalFileSize)}<br>Compressing...`;
+            outputImage.style.display = 'none';
+
+            M.toast({html: 'Processing image...', classes: 'blue'});
+
+            // 1. read the selected file into an image object
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = async function() {
+                    
+                    // 2. set canvas dimensions to match the image
+                    imageCanvas.width = img.width;
+                    imageCanvas.height = img.height;
+
+                    // 3. draw the original image onto the canvas
+                    ctx.drawImage(img, 0, 0, img.width, img.height);
+
+                    // 4. get the compression settings
+                    const qualityValue = parseInt(qualitySlider.value);
+                    const quality = qualityValue / 100;
+                    const mimeType = 'image/jpeg'; // We will always output as JPEG for compression benefits
+
+                    // 5. COMPRESSION: get the compressed Data URL
+                    const compressedDataURL = imageCanvas.toDataURL(mimeType, quality);
+                    
+                    // 6. convert Data URL to a blob to measure its size and download it
+                    const blob = window.dataURLToBlob(compressedDataURL);
+                    const compressedFileSize = blob.size;
+                    
+                    // 7. calculate stats and update UI
+                    const reduction = ((originalFileSize - compressedFileSize) / originalFileSize) * 100;
+                    const originalFileName = originalFile.name.split('.').slice(0, -1).join('.');
+                    const compressedFileName = `${originalFileName}_squeezed_${qualityValue}.jpeg`;
+
+                    loadingIndicator.style.display = 'none';
+                    outputImage.src = compressedDataURL;
+                    outputImage.style.display = 'block';
+                    
+                    sizeInfo.innerHTML = `
+                        Original Size: ${humanFileSize(originalFileSize)}<br>
+                        Compressed Size: <span class="green-text text-darken-3">${humanFileSize(compressedFileSize)}</span><br>
+                        Size Reduction: <span class="green-text text-darken-3">${reduction.toFixed(1)}%</span>
+                    `;
+
+                    // --- save record to local/cloud DB ---
+                    const recordData = {
+                        name: originalFile.name,
+                        quality: qualityValue,
+                        originalSize: originalFileSize,
+                        compressedSize: compressedFileSize,
+                        reduction: reduction,
+                    };
+                    const saveResult = await saveRecord(recordData, isOnline);
+                    M.toast({html: saveResult.message, classes: saveResult.isSynced ? 'green darken-2' : 'orange darken-2'});
+                    window.renderHistory(); // refresh history list
+
+                    // 8. trigger download
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = URL.createObjectURL(blob);
+                    downloadLink.download = compressedFileName;
+                    downloadLink.click();
+                    URL.revokeObjectURL(downloadLink.href); // clean up memory
+
+                    M.toast({html: `Compression successful! Saved ${humanFileSize(compressedFileSize)}.`, classes: 'green darken-2'});
+
+                };
+                img.src = event.target.result; // start loading the image
+            };
+            reader.readAsDataURL(originalFile); // start reading the file
+        }
+
+        // --- original utility/UI Setup (moved to window for global access/cleanup) ---
+        window.humanFileSize = (bytes) => {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        qualitySlider.addEventListener('input', () => {
+            qualityValueSpan.textContent = `${qualitySlider.value}%`;
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            originalFile = e.target.files[0];
+            if (originalFile) {
+                if (!originalFile.type.match('image/(jpeg|png)')) {
+                    M.toast({html: 'Only JPEG and PNG images are supported.', classes: 'red darken-2'});
+                    fileInput.value = '';
+                    settingsArea.style.display = 'none';
+                    return;
+                }
+                
+                originalFileSize = originalFile.size;
+                fileNameDisplay.textContent = originalFile.name;
+                settingsArea.style.display = 'block';
+                outputImage.style.display = 'none';
+                sizeInfo.textContent = `Original Size: ${humanFileSize(originalFileSize)}`;
+                
+                M.toast({html: 'Image loaded! Set your quality and squeeze.', classes: 'green darken-1'});
+            }
+        });
+        
+        window.dataURLToBlob = (dataURL) => {
+            const parts = dataURL.split(';base64,');
+            const contentType = parts[0].split(':')[1];
+            const raw = window.atob(parts[1]);
+            const rawLength = raw.length;
+            const uInt8Array = new Uint8Array(rawLength);
+
+            for (let i = 0; i < rawLength; ++i) {
+                uInt8Array[i] = raw.charCodeAt(i);
+            }
+            return new Blob([uInt8Array], { type: contentType });
+        }
+
+
+        // --- PWA setup (for installability/offline) ---
+        let deferredPrompt;
+        const installPromptDiv = document.getElementById('install-prompt');
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(reg => console.log('Service Worker Registered Successfully.'))
+                    .catch(err => console.error('Service Worker Registration Failed:', err));
+            });
+        }
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (!window.matchMedia('(display-mode: standalone)').matches) {
+                installPromptDiv.style.display = 'block';
+            }
+        });
+
+        window.promptInstall = () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        M.toast({html: 'App installed! It lives on your home screen now.', classes: 'blue'});
+                    } else {
+                        M.toast({html: 'Installation cancelled.', classes: 'orange'});
+                    }
+                    deferredPrompt = null;
+                    installPromptDiv.style.display = 'none';
+                });
+            }
+        }
+        
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            M.Tooltip.init(document.querySelectorAll('.tooltipped'));
+
+            // 1. Initialize Firebase Auth
+            await initializeAuth();
+            
+            // 2. Set initial network and Firebase status
+            updateNetworkStatus(navigator.onLine); 
+            
+            // 3. Load/Subscribe to History (only if auth is ready for cloud access)
+            if (isAuthReady) {
+                // If online, subscribe to real-time updates which also loads initial data
+                if (navigator.onLine) {
+                    subscribeToFirebaseRecords(window.renderHistory);
+                } else {
+                    // If offline, just load from local IndexedDB
+                    window.renderHistory();
+                }
+            } else {
+                // If not using Firebase (e.g., config missing), only load from local IndexedDB
+                window.renderHistory();
+            }
+
+            // 4. Update the status indicator after initialization
+            if (isAuthReady) {
+                 if (navigator.onLine) {
+                    firebaseStatus.innerHTML = `<i class="material-icons left green-text">cloud_done</i> Synced`;
+                 } else {
+                    firebaseStatus.innerHTML = `<i class="material-icons left orange-text">portable_wifi_off</i> Local DB Active`;
+                 }
+            } else {
+                 firebaseStatus.innerHTML = `<i class="material-icons left red-text">cloud_off</i> Local Only`;
+            }
+        });
+    </script>
+</body>
+</html>

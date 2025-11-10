@@ -1,0 +1,36 @@
+body {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    background-color: #f0f4c3;
+    font-family: 'Inter', sans-serif;
+}
+main {
+    flex: 1 0 auto;
+    padding: 20px;
+    padding-bottom: 70px;
+}
+.container {
+    max-width: 600px;
+}
+.card-panel {
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+/* PWA install banner */
+#install-prompt {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #c0ca33; /* lime darken-1 */
+    color: #212121; /* nearly black text */
+    padding: 12px 20px;
+    display: none; /* hidden by default, shown by PWA JS */
+    z-index: 1000;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    font-weight: 500;
+}
+#install-prompt .right {
+    margin-left: 10px;
+}
