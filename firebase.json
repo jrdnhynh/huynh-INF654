@@ -1,0 +1,16 @@
+{
+  "hosting": {
+    "public": "Week 14_15/Pixel Squeeze", 
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

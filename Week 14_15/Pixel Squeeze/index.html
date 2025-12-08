@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Squeeze: Image Compressor</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+    <header>
+        <nav class="lime darken-1">
+            <div class="nav-wrapper container">
+                <a href="#!" class="brand-logo truncate">Pixel Squeeze</a>
+                <ul class="right">
+                    <li id="nav-login-btn">
+                        <a href="#" onclick="handleLogin()" class="btn white lime-text text-darken-3 waves-effect">
+                            Sign In
+                        </a>
+                    </li>
+                    <li id="nav-user-info" style="display: none;">
+                        <span id="user-display-name" style="margin-right: 10px;"></span>
+                        <a href="#" onclick="handleLogout()" class="btn-flat white-text" style="display:inline-flex; align-items:center;">
+                            <i class="material-icons">exit_to_app</i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        
+        <div id="login-screen" class="row center-align" style="margin-top: 50px;">
+            <div class="col s12 m8 offset-m2">
+                <div class="card-panel z-depth-2">
+                    <i class="material-icons large lime-text text-darken-2">lock_outline</i>
+                    <h4>Welcome to Pixel Squeeze</h4>
+                    <p class="flow-text">Sign in to compress images, sync your history across devices, and work offline.</p>
+                    <button class="btn-large lime darken-2 waves-effect waves-light" onclick="handleLogin()">
+                        <i class="material-icons left">login</i> Sign in with Google
+                    </button>
+                    <p class="grey-text text-lighten-1" style="margin-top:20px"><small>Secure authentication powered by Firebase</small></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="app-interface" class="row" style="display: none;">
+            <div class="col s12">
+                <div class="card-panel white z-depth-3 center-align" style="border-radius: 8px;">
+                    <i class="material-icons large lime-text text-darken-3">photo_camera</i>
+                    <h5>Get Your Images Small!</h5>
+                    
+                    <div id="firebaseStatus" class="chip right" style="margin-top: 5px;">
+                        <i class="material-icons left red-text">cloud_off</i> Checking...
+                    </div>
+
+                    <div class="file-field input-field" style="margin-top: 30px;">
+                        <div class="btn lime darken-1 waves-effect waves-light" style="border-radius: 4px;">
+                            <span>Select Picture</span>
+                            <input type="file" id="fileInput" accept="image/jpeg, image/png">
+                        </div>
+                        <div class="file-path-wrapper">
+                            <input class="file-path validate" type="text" placeholder="No file selected yet">
+                        </div>
+                    </div>
+
+                    <div id="settings-area" style="display: none; margin-top: 25px; text-align: left;">
+                        <p>Selected File: <strong id="fileNameDisplay"></strong></p>
+                        
+                        <label for="qualitySlider">JPEG Compression Quality (10 - 100):</label>
+                        <p class="range-field">
+                            <span id="qualityValue" class="right lime-text text-darken-3">80%</span>
+                            <input type="range" id="qualitySlider" min="10" max="100" value="80" />
+                        </p>
+                        
+                        <a id="compressButton" class="waves-effect waves-light btn-large lime darken-1 full-width" style="width: 100%; margin-top: 20px; border-radius: 4px;" onclick="startCompression()">
+                            <i class="material-icons left">compress</i>Squeeze & Download
+                        </a>
+                        
+                        <div class="progress" id="loadingIndicator" style="display: none;">
+                            <div class="indeterminate lime darken-2"></div>
+                        </div>
+                        
+                        <div id="sizeInfo" class="flow-text" style="margin-top: 15px; font-weight: bold;"></div>
+                    </div>
+
+                    <canvas id="imageCanvas" style="display: none;"></canvas>
+                    <img id="output-image" style="max-width: 100%; height: auto; border-radius: 4px; margin-top: 20px; display: none; border: 1px solid #c0ca33;" alt="Compressed Preview" />
+                    
+                    <h5 style="margin-top: 30px; text-align: left;"><i class="material-icons left">history</i> History</h5>
+                    <ul class="collection" id="historyList" style="text-align: left;">
+                        <li class="collection-item grey-text">Loading records...</li>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="install-prompt">
+        Install the app for instant access and offline compression!
+        <a href="#" class="btn-small white lime-text text-darken-4 right" id="install-button" onclick="promptInstall()" style="border-radius: 4px; font-weight: bold;">Install</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://unpkg.com/dexie@3.2.1/dist/dexie.js"></script>
+    
+    <script type="module" src="firebaseConfig.js"></script>
+    <script type="module" src="firebaseDB.js"></script>
+
+    <script type="module">
+        import { initializeAuth, isAuthReady, auth, loginUser, logoutUser, userProfile } from "./firebaseConfig.js";
+        import { saveRecord, getLocalRecords, subscribeToFirebaseRecords, syncOfflineToFirebase, deleteRecord } from "./firebaseDB.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+
+        // --- DOM Elements ---
+        const loginScreen = document.getElementById('login-screen');
+        const appInterface = document.getElementById('app-interface');
+        const navLoginBtn = document.getElementById('nav-login-btn');
+        const navUserInfo = document.getElementById('nav-user-info');
+        const userDisplayName = document.getElementById('user-display-name');
+        
+        // --- Expose Auth functions to window for HTML onClick ---
+        window.handleLogin = async () => {
+            try {
+                await loginUser();
+                M.toast({html: 'Signed in successfully!', classes: 'green'});
+            } catch (error) {
+                M.toast({html: 'Sign in failed: ' + error.message, classes: 'red'});
+            }
+        };
+
+        window.handleLogout = async () => {
+            await logoutUser();
+            M.toast({html: 'Signed out.', classes: 'blue'});
+            window.renderHistory(); // clear history from view
+        };
+
+        // --- auth state observer (UI Toggling) ---
+        // switches between "Login Mode" and "App Mode"
+        function setupAuthListener() {
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    // show app, hide login
+                    loginScreen.style.display = 'none';
+                    appInterface.style.display = 'block';
+                    navLoginBtn.style.display = 'none';
+                    navUserInfo.style.display = 'block';
+                    userDisplayName.textContent = user.displayName || user.email;
+                    
+                    // trigger sync and rendering
+                    updateNetworkStatus(navigator.onLine);
+                    subscribeToFirebaseRecords(window.renderHistory);
+                } else {
+                    // show Login, hide App
+                    loginScreen.style.display = 'block';
+                    appInterface.style.display = 'none';
+                    navLoginBtn.style.display = 'block';
+                    navUserInfo.style.display = 'none';
+                }
+            });
+        }
+
+        
+        const fileInput = document.getElementById('fileInput');
+        const settingsArea = document.getElementById('settings-area');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const sizeInfo = document.getElementById('sizeInfo');
+        const outputImage = document.getElementById('output-image');
+        const imageCanvas = document.getElementById('imageCanvas');
+        const ctx = imageCanvas.getContext('2d');
+        const firebaseStatus = document.getElementById('firebaseStatus');
+        const historyList = document.getElementById('historyList');
+        
+        let originalFile = null;
+        let originalFileSize = 0;
+        let isOnline = navigator.onLine;
+
+        function updateNetworkStatus(online) {
+            isOnline = online;
+            if (isOnline) {
+                firebaseStatus.innerHTML = `<i class="material-icons left green-text">cloud_done</i> Synced`;
+                firebaseStatus.classList.remove('red-text');
+                firebaseStatus.classList.add('green-text');
+                // only sync if logged in
+                if (auth.currentUser) {
+                    syncOfflineToFirebase().then(result => {
+                        if (result.count > 0) M.toast({html: result.message, classes: 'green darken-2'});
+                    });
+                }
+            } else {
+                firebaseStatus.innerHTML = `<i class="material-icons left red-text">cloud_off</i> Offline`;
+                firebaseStatus.classList.remove('green-text');
+                firebaseStatus.classList.add('red-text');
+            }
+        }
+
+        window.renderHistory = async () => {
+            // wait a tick if auth isn't ready to avoid empty reads on load
+            if (!auth.currentUser) {
+                 // clear list if logged out
+                 historyList.innerHTML = '';
+                 return;
+            }
+
+            const records = await getLocalRecords();
+            historyList.innerHTML = ''; 
+
+            if (records.length === 0) {
+                historyList.innerHTML = '<li class="collection-item grey-text">No records found for this user.</li>';
+                return;
+            }
+
+            records.forEach(record => {
+                const isSynced = record.synced;
+                const syncIcon = isSynced 
+                    ? `<i class="material-icons green-text tooltipped" data-tooltip="Synced" data-position="left">cloud_done</i>`
+                    : `<i class="material-icons orange-text tooltipped" data-tooltip="Pending Sync" data-position="left">cloud_upload</i>`;
+                
+                const deleteIcon = `<i class="material-icons secondary-content red-text delete-record" data-id="${record.firebaseId || record.id}" data-synced="${isSynced}" style="cursor:pointer">delete_forever</i>`;
+                
+                const recordElement = `
+                    <li class="collection-item">
+                        <div>
+                            ${record.name}
+                            ${deleteIcon}
+                            <span class="secondary-content" style="margin-right: 15px;">${syncIcon}</span>
+                            <p class="grey-text text-darken-1" style="margin-top: 5px;">
+                                ${window.humanFileSize(record.compressedSize)} (${record.reduction.toFixed(1)}% saved)
+                            </p>
+                        </div>
+                    </li>
+                `;
+                historyList.innerHTML += recordElement;
+            });
+            
+            M.Tooltip.init(document.querySelectorAll('.tooltipped'));
+            document.querySelectorAll('.delete-record').forEach(icon => {
+                icon.addEventListener('click', async (e) => {
+                    const id = e.target.getAttribute('data-id');
+                    const isFirebaseRecord = e.target.getAttribute('data-synced') === 'true';
+                    await deleteRecord(id, isFirebaseRecord, isOnline);
+                    window.renderHistory();
+                });
+            });
+        };
+
+        // --- compression & file Handling ---
+        window.startCompression = async () => {
+            if (!originalFile) return M.toast({html: 'Pick an image!', classes: 'red'});
+            
+            loadingIndicator.style.display = 'block';
+            outputImage.style.display = 'none';
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = async function() {
+                    imageCanvas.width = img.width;
+                    imageCanvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+
+                    const quality = parseInt(document.getElementById('qualitySlider').value) / 100;
+                    const compressedDataURL = imageCanvas.toDataURL('image/jpeg', quality);
+                    const blob = window.dataURLToBlob(compressedDataURL);
+                    
+                    const reduction = ((originalFileSize - blob.size) / originalFileSize) * 100;
+
+                    // UI updates
+                    loadingIndicator.style.display = 'none';
+                    outputImage.src = compressedDataURL;
+                    outputImage.style.display = 'block';
+                    sizeInfo.innerHTML = `New Size: <span class="green-text text-darken-3">${window.humanFileSize(blob.size)}</span>`;
+
+                    // Save
+                    try {
+                        const recordData = {
+                            name: originalFile.name,
+                            quality: quality * 100,
+                            originalSize: originalFileSize,
+                            compressedSize: blob.size,
+                            reduction: reduction,
+                        };
+                        const result = await saveRecord(recordData, navigator.onLine);
+                        M.toast({html: result.message, classes: result.isSynced ? 'green' : 'orange'});
+                        window.renderHistory();
+                    } catch (e) {
+                        M.toast({html: "Save failed: " + e.message, classes: 'red'});
+                    }
+
+                    // download
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `squeezed_${Date.now()}.jpg`;
+                    link.click();
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(originalFile);
+        }
+
+        // --- utilities ---
+        window.humanFileSize = (bytes) => {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + ['B', 'KB', 'MB', 'GB'][i];
+        };
+        
+        window.dataURLToBlob = (dataURL) => {
+            const parts = dataURL.split(';base64,');
+            const raw = window.atob(parts[1]);
+            const uInt8Array = new Uint8Array(raw.length);
+            for (let i = 0; i < raw.length; ++i) uInt8Array[i] = raw.charCodeAt(i);
+            return new Blob([uInt8Array], { type: parts[0].split(':')[1] });
+        }
+
+        fileInput.addEventListener('change', (e) => {
+            originalFile = e.target.files[0];
+            if (originalFile) {
+                originalFileSize = originalFile.size;
+                document.getElementById('fileNameDisplay').textContent = originalFile.name;
+                settingsArea.style.display = 'block';
+            }
+        });
+        
+        document.getElementById('qualitySlider').addEventListener('input', (e) => {
+            document.getElementById('qualityValue').textContent = e.target.value + '%';
+        });
+
+        // --- PWA Install ---
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('install-prompt').style.display = 'block';
+        });
+        window.promptInstall = () => {
+            if (deferredPrompt) deferredPrompt.prompt();
+            document.getElementById('install-prompt').style.display = 'none';
+        };
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            M.Tooltip.init(document.querySelectorAll('.tooltipped'));
+            
+            // 1. Register Service Worker
+            if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js');
+            
+            // 2. Initialize Auth & Listener
+            await initializeAuth();
+            setupAuthListener(); // This will trigger the UI updates
+            
+            // 3. Network Listeners
+            window.addEventListener('online', () => updateNetworkStatus(true));
+            window.addEventListener('offline', () => updateNetworkStatus(false));
+            updateNetworkStatus(navigator.onLine);
+        });
+    </script>
+</body>
+</html>
